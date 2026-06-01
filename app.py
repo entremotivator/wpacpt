@@ -97,23 +97,23 @@ with st.sidebar:
     st.header("Connection Settings")
     
     # Connection settings
-    wp_url = st.text_input("WordPress URL", placeholder="https://example.com")
+    wp_url = st.text_input("WordPress URL", placeholder="https://example.com", key="sidebar_wp_url")
     
-    auth_method = st.radio("Authentication Method", ["None", "Basic Auth", "Application Password", "JWT/OAuth"])
+    auth_method = st.radio("Authentication Method", ["None", "Basic Auth", "Application Password", "JWT/OAuth"], key="sidebar_auth_method")
     
     username = ""
     password = ""
     token = ""
     
     if auth_method == "JWT/OAuth":
-        token = st.text_input("Authentication Token", type="password")
+        token = st.text_input("Authentication Token", type="password", key="sidebar_auth_token")
         st.session_state.auth_token = token
     elif auth_method in ["Basic Auth", "Application Password"]:
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
+        username = st.text_input("Username", key="sidebar_username")
+        password = st.text_input("Password", type="password", key="sidebar_password")
     
     # Test connection button
-    if st.button("Test Connection"):
+    if st.button("Test Connection", key="sidebar_test_connection"):
         if not wp_url:
             st.error("Please enter a WordPress URL")
         else:
@@ -145,34 +145,34 @@ with st.sidebar:
     
     # Post type selection
     st.header("Post Type")
-    post_type = st.selectbox("Select Post Type", ["post", "product", "page", "property", "stock", "assessment", "custom"])
+    post_type = st.selectbox("Select Post Type", ["post", "product", "page", "property", "stock", "assessment", "custom"], key="sidebar_post_type")
     
     if post_type == "custom":
-        post_type = st.text_input("Enter Custom Post Type")
+        post_type = st.text_input("Enter Custom Post Type", key="sidebar_custom_post_type")
     
     # Template selection
     st.header("Industry Templates")
     template_category = st.selectbox("Select Template Category", 
-                                    ["None", "Real Estate", "Stock Market", "DISC Assessment", "Product Catalog", "Event Management"])
+                                    ["None", "Real Estate", "Stock Market", "DISC Assessment", "Product Catalog", "Event Management"], key="sidebar_template_category")
     
     if template_category != "None":
         if template_category == "Real Estate":
             template_name = st.selectbox("Select Template", 
-                                        ["Residential Property", "Commercial Property", "Rental Listing", "Land Listing"])
+                                        ["Residential Property", "Commercial Property", "Rental Listing", "Land Listing"], key="sidebar_template_real_estate")
         elif template_category == "Stock Market":
             template_name = st.selectbox("Select Template", 
-                                        ["Stock Profile", "Market Analysis", "Portfolio Summary", "Financial Report"])
+                                        ["Stock Profile", "Market Analysis", "Portfolio Summary", "Financial Report"], key="sidebar_template_stock_market")
         elif template_category == "DISC Assessment":
             template_name = st.selectbox("Select Template", 
-                                        ["Individual Assessment", "Team Assessment", "Leadership Profile", "Career Recommendation"])
+                                        ["Individual Assessment", "Team Assessment", "Leadership Profile", "Career Recommendation"], key="sidebar_template_disc")
         elif template_category == "Product Catalog":
             template_name = st.selectbox("Select Template", 
-                                        ["Physical Product", "Digital Product", "Service Offering", "Subscription"])
+                                        ["Physical Product", "Digital Product", "Service Offering", "Subscription"], key="sidebar_template_product")
         elif template_category == "Event Management":
             template_name = st.selectbox("Select Template", 
-                                        ["Conference", "Workshop", "Webinar", "Social Event"])
+                                        ["Conference", "Workshop", "Webinar", "Social Event"], key="sidebar_template_event")
         
-        if st.button("Load Template"):
+        if st.button("Load Template", key="sidebar_load_template"):
             st.session_state.current_template = f"{template_category} - {template_name}"
             st.success(f"Template loaded: {template_name}")
     
@@ -1181,13 +1181,13 @@ with tab1:
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        search_term = st.text_input("Search by Title", placeholder="Enter keywords...")
+        search_term = st.text_input("Search by Title", placeholder="Enter keywords...", key="view_search_title")
     
     with col2:
-        status_filter = st.selectbox("Filter by Status", ["All", "Published", "Draft", "Pending", "Private"])
+        status_filter = st.selectbox("Filter by Status", ["All", "Published", "Draft", "Pending", "Private"], key="view_filter_status")
     
     with col3:
-        sort_by = st.selectbox("Sort by", ["Date (Newest)", "Date (Oldest)", "Title (A-Z)", "Title (Z-A)"])
+        sort_by = st.selectbox("Sort by", ["Date (Newest)", "Date (Oldest)", "Title (A-Z)", "Title (Z-A)"], key="view_sort_by")
     
     # Fetch posts button
     fetch_col1, fetch_col2 = st.columns([3, 1])
@@ -1227,7 +1227,8 @@ with tab1:
             data=json.dumps(st.session_state.posts, indent=2) if 'posts' in st.session_state and st.session_state.posts else "[]",
             file_name=f"{post_type}_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
             mime="application/json",
-            disabled=not ('posts' in st.session_state and st.session_state.posts)
+            disabled=not ('posts' in st.session_state and st.session_state.posts),
+            key="view_export_results_download"
         )
     
     # Display posts in a table
@@ -1262,7 +1263,7 @@ with tab1:
         
         # Select a post to view details
         selected_post_id = st.selectbox("Select a post to view details", 
-                                       [f"{p['ID']} - {p['Title']}" for p in post_data])
+                                       [f"{p['ID']} - {p['Title']}" for p in post_data], key="view_selected_post_id")
         
         if selected_post_id:
             post_id = int(selected_post_id.split(" - ")[0])
@@ -1273,20 +1274,20 @@ with tab1:
                 col1, col2, col3, col4 = st.columns(4)
                 
                 with col1:
-                    if st.button("Edit Post", use_container_width=True):
+                    if st.button("Edit Post", key="view_edit_post", use_container_width=True):
                         st.session_state.current_template = "Custom"
                         st.session_state.edit_post = selected_post
                         st.info("Post loaded for editing in the 'Create Post' tab")
                 
                 with col2:
-                    if st.button("View on Site", use_container_width=True):
+                    if st.button("View on Site", key="view_open_site", use_container_width=True):
                         if "link" in selected_post:
                             st.markdown(f"[Open Post on Site]({selected_post['link']})")
                         else:
                             st.warning("Post link not available")
                 
                 with col3:
-                    if st.button("Duplicate Post", use_container_width=True):
+                    if st.button("Duplicate Post", key="view_duplicate_post", use_container_width=True):
                         # Create a duplicate with a new title
                         duplicate_post = selected_post.copy()
                         if "title" in duplicate_post and "rendered" in duplicate_post["title"]:
@@ -1296,9 +1297,9 @@ with tab1:
                         st.info("Post duplicated and loaded for editing in the 'Create Post' tab")
                 
                 with col4:
-                    if st.button("Delete Post", use_container_width=True):
+                    if st.button("Delete Post", key="view_delete_post", use_container_width=True):
                         if st.session_state.connection_status:
-                            confirm = st.checkbox("Confirm deletion")
+                            confirm = st.checkbox("Confirm deletion", key="view_confirm_delete")
                             if confirm:
                                 auth_token = st.session_state.auth_token if auth_method == "JWT/OAuth" else None
                                 result = delete_post(wp_url, post_type, post_id, username, password, auth_token)
@@ -1412,10 +1413,10 @@ with tab2:
         }
     
     # Basic post information
-    post_title = st.text_input("Post Title", value=template_data.get("title", ""))
-    post_content = st.text_area("Post Content", value=template_data.get("content", ""), height=200)
+    post_title = st.text_input("Post Title", value=template_data.get("title", ""), key="create_post_title")
+    post_content = st.text_area("Post Content", value=template_data.get("content", ""), height=200, key="create_post_content")
     post_status = st.selectbox("Post Status", ["draft", "publish", "pending", "private"], 
-                              index=["draft", "publish", "pending", "private"].index(template_data.get("status", "draft")))
+                              index=["draft", "publish", "pending", "private"].index(template_data.get("status", "draft")), key="create_post_status")
     
     # ACPT Meta Fields
     st.markdown('<p class="sub-header">ACPT Meta Fields</p>', unsafe_allow_html=True)
@@ -1465,8 +1466,8 @@ with tab2:
     # UI for managing meta boxes
     with st.expander("Manage Meta Boxes", expanded=True):
         # Add new meta box
-        new_box_name = st.text_input("New Meta Box Name")
-        if st.button("Add Meta Box") and new_box_name:
+        new_box_name = st.text_input("New Meta Box Name", key="create_new_meta_box_name")
+        if st.button("Add Meta Box", key="create_add_meta_box") and new_box_name:
             if new_box_name not in meta_boxes:
                 meta_boxes[new_box_name] = []
                 st.success(f"Meta box '{new_box_name}' added")
@@ -1579,7 +1580,7 @@ with tab2:
                         if st.button("🗑️", key=f"delete_{field_key}"):
                             fields.pop(i)
                             st.success(f"Field '{field['name']}' deleted")
-                            st.experimental_rerun()
+                            st.rerun()
             else:
                 st.info("No fields in this meta box. Add a field using the form above.")
     
@@ -1589,7 +1590,7 @@ with tab2:
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("Preview JSON", use_container_width=True):
+        if st.button("Preview JSON", key="create_preview_json", use_container_width=True):
             # Prepare post data
             post_data = {
                 "title": post_title,
@@ -1614,7 +1615,7 @@ with tab2:
     
     with col2:
         button_text = "Update Post" if editing_post else "Create Post"
-        if st.button(button_text, use_container_width=True):
+        if st.button(button_text, key="create_save_post", use_container_width=True):
             if not wp_url:
                 st.warning("Please enter a WordPress URL")
             elif not post_title:
@@ -1678,7 +1679,7 @@ with tab3:
     
     # Select visualization type
     viz_type = st.selectbox("Select Visualization Type", 
-                           ["Template-based Visualization", "Custom Visualization"])
+                           ["Template-based Visualization", "Custom Visualization"], key="viz_type")
     
     if viz_type == "Template-based Visualization":
         # Use template for visualization
@@ -1700,7 +1701,7 @@ with tab3:
             
             # Select visualization
             viz_option = st.selectbox("Select Visualization", 
-                                     ["Post Status Distribution", "Posts by Date", "Meta Field Analysis"])
+                                     ["Post Status Distribution", "Posts by Date", "Meta Field Analysis"], key="viz_option")
             
             if viz_option == "Post Status Distribution":
                 # Count posts by status
@@ -1764,10 +1765,10 @@ with tab3:
                                 meta_fields[box_name].add(field_name)
                 
                 if meta_boxes:
-                    selected_box = st.selectbox("Select Meta Box", list(meta_boxes))
+                    selected_box = st.selectbox("Select Meta Box", list(meta_boxes), key="viz_selected_meta_box")
                     
                     if selected_box in meta_fields and meta_fields[selected_box]:
-                        selected_field = st.selectbox("Select Field", list(meta_fields[selected_box]))
+                        selected_field = st.selectbox("Select Field", list(meta_fields[selected_box]), key="viz_selected_meta_field")
                         
                         # Extract field values
                         field_values = []
@@ -1844,7 +1845,7 @@ with tab4:
         st.markdown("### Export Options")
         
         export_type = st.radio("What would you like to export?", 
-                              ["Template", "Current Post", "All Fetched Posts", "Custom Query"])
+                              ["Template", "Current Post", "All Fetched Posts", "Custom Query"], key="export_type")
         
         if export_type == "Template":
             # Export template
@@ -1884,7 +1885,7 @@ with tab4:
                 st.success(f"Exporting {len(st.session_state.posts)} posts")
                 
                 # Options for export format
-                export_format = st.radio("Export Format", ["Full JSON", "Simplified JSON", "CSV"])
+                export_format = st.radio("Export Format", ["Full JSON", "Simplified JSON", "CSV"], key="export_all_format")
                 
                 if export_format == "Full JSON":
                     # Full JSON export
@@ -1955,18 +1956,18 @@ with tab4:
             col1, col2 = st.columns(2)
             
             with col1:
-                query_post_type = st.selectbox("Post Type", ["post", "product", "page", "property", "stock", "assessment", "custom"])
+                query_post_type = st.selectbox("Post Type", ["post", "product", "page", "property", "stock", "assessment", "custom"], key="export_query_post_type")
                 
                 if query_post_type == "custom":
-                    query_post_type = st.text_input("Enter Custom Post Type")
+                    query_post_type = st.text_input("Enter Custom Post Type", key="export_query_custom_post_type")
             
             with col2:
-                query_status = st.selectbox("Status", ["Any", "publish", "draft", "pending", "private"])
+                query_status = st.selectbox("Status", ["Any", "publish", "draft", "pending", "private"], key="export_query_status")
             
-            query_limit = st.slider("Number of Posts", min_value=1, max_value=100, value=10)
+            query_limit = st.slider("Number of Posts", min_value=1, max_value=100, value=10, key="export_query_limit")
             
             # Execute query button
-            if st.button("Execute Query and Export"):
+            if st.button("Execute Query and Export", key="export_execute_query"):
                 if not wp_url:
                     st.warning("Please enter a WordPress URL")
                 elif not st.session_state.connection_status:
@@ -1995,7 +1996,7 @@ with tab4:
                                 st.json(query_results)
                             
                             # Export options
-                            export_format = st.radio("Export Format", ["JSON", "CSV"])
+                            export_format = st.radio("Export Format", ["JSON", "CSV"], key="export_query_format")
                             
                             if export_format == "JSON":
                                 json_str = json.dumps(query_results, indent=2)
@@ -2042,15 +2043,15 @@ with tab4:
         st.markdown("### Import Options")
         
         import_type = st.radio("What would you like to import?", 
-                              ["JSON Template", "JSON Post", "Bulk Import"])
+                              ["JSON Template", "JSON Post", "Bulk Import"], key="import_type")
         
         if import_type == "JSON Template":
             # Import JSON template
             st.subheader("Import JSON Template")
             
-            template_json = st.text_area("Paste JSON Template", height=300)
+            template_json = st.text_area("Paste JSON Template", height=300, key="import_template_json")
             
-            if st.button("Load Template"):
+            if st.button("Load Template", key="import_load_template") :
                 if template_json:
                     try:
                         template_data = json.loads(template_json)
@@ -2069,12 +2070,12 @@ with tab4:
             # Import JSON post
             st.subheader("Import JSON Post")
             
-            post_json = st.text_area("Paste JSON Post", height=300)
+            post_json = st.text_area("Paste JSON Post", height=300, key="import_post_json")
             
             col1, col2 = st.columns(2)
             
             with col1:
-                if st.button("Preview Post"):
+                if st.button("Preview Post", key="import_preview_post"):
                     if post_json:
                         try:
                             post_data = json.loads(post_json)
@@ -2115,7 +2116,7 @@ with tab4:
                             st.error("Invalid JSON format. Please check your input")
             
             with col2:
-                if st.button("Load for Editing"):
+                if st.button("Load for Editing", key="import_load_for_editing"):
                     if post_json:
                         try:
                             post_data = json.loads(post_json)
@@ -2134,10 +2135,10 @@ with tab4:
             # Bulk import
             st.subheader("Bulk Import")
             
-            import_method = st.radio("Import Method", ["Upload JSON File", "Paste JSON Array"])
+            import_method = st.radio("Import Method", ["Upload JSON File", "Paste JSON Array"], key="import_method")
             
             if import_method == "Upload JSON File":
-                uploaded_file = st.file_uploader("Upload JSON File", type=["json"])
+                uploaded_file = st.file_uploader("Upload JSON File", type=["json"], key="import_upload_json_file")
                 
                 if uploaded_file is not None:
                     try:
@@ -2154,13 +2155,13 @@ with tab4:
                             # Import options
                             st.subheader("Import Options")
                             
-                            import_post_type = st.selectbox("Post Type for Import", ["post", "product", "page", "property", "stock", "assessment", "custom"])
+                            import_post_type = st.selectbox("Post Type for Import", ["post", "product", "page", "property", "stock", "assessment", "custom"], key="import_file_post_type")
                             
                             if import_post_type == "custom":
-                                import_post_type = st.text_input("Enter Custom Post Type")
+                                import_post_type = st.text_input("Enter Custom Post Type", key="import_file_custom_post_type")
                             
                             # Execute import button
-                            if st.button("Execute Bulk Import"):
+                            if st.button("Execute Bulk Import", key="import_file_execute_bulk") :
                                 if not wp_url:
                                     st.warning("Please enter a WordPress URL")
                                 elif not st.session_state.connection_status:
@@ -2199,9 +2200,9 @@ with tab4:
                         st.error("Invalid JSON file. Please check the file format")
             
             elif import_method == "Paste JSON Array":
-                import_json = st.text_area("Paste JSON Array", height=300)
+                import_json = st.text_area("Paste JSON Array", height=300, key="import_paste_json_array")
                 
-                if st.button("Validate Import Data"):
+                if st.button("Validate Import Data", key="import_validate_json_array"):
                     if import_json:
                         try:
                             import_data = json.loads(import_json)
@@ -2217,13 +2218,13 @@ with tab4:
                                 # Import options
                                 st.subheader("Import Options")
                                 
-                                import_post_type = st.selectbox("Post Type for Import", ["post", "product", "page", "property", "stock", "assessment", "custom"])
+                                import_post_type = st.selectbox("Post Type for Import", ["post", "product", "page", "property", "stock", "assessment", "custom"], key="import_paste_post_type")
                                 
                                 if import_post_type == "custom":
-                                    import_post_type = st.text_input("Enter Custom Post Type")
+                                    import_post_type = st.text_input("Enter Custom Post Type", key="import_paste_custom_post_type")
                                 
                                 # Execute import button
-                                if st.button("Execute Bulk Import from JSON"):
+                                if st.button("Execute Bulk Import from JSON", key="import_paste_execute_bulk") :
                                     if not wp_url:
                                         st.warning("Please enter a WordPress URL")
                                     elif not st.session_state.connection_status:
@@ -2267,13 +2268,13 @@ with tab5:
     
     # Batch operation types
     operation_type = st.selectbox("Select Operation Type", 
-                                 ["Bulk Create", "Bulk Update", "Bulk Delete"])
+                                 ["Bulk Create", "Bulk Update", "Bulk Delete"], key="batch_operation_type")
     
     if operation_type == "Bulk Create":
         st.subheader("Bulk Create Posts")
         
         # Template selection
-        use_template = st.checkbox("Use Template for Bulk Creation")
+        use_template = st.checkbox("Use Template for Bulk Creation", key="batch_use_template")
         
         if use_template:
             if st.session_state.current_template:
@@ -2300,16 +2301,16 @@ with tab5:
             }
         
         # Number of posts to create
-        num_posts = st.number_input("Number of Posts to Create", min_value=1, max_value=100, value=5)
+        num_posts = st.number_input("Number of Posts to Create", min_value=1, max_value=100, value=5, key="batch_num_posts")
         
         # Base title and content
-        base_title = st.text_input("Base Title", value=template_data.get("title", ""))
-        base_content = st.text_area("Base Content", value=template_data.get("content", ""), height=100)
+        base_title = st.text_input("Base Title", value=template_data.get("title", ""), key="batch_base_title")
+        base_content = st.text_area("Base Content", value=template_data.get("content", ""), height=100, key="batch_base_content")
         post_status = st.selectbox("Post Status", ["draft", "publish", "pending", "private"], 
-                                  index=["draft", "publish", "pending", "private"].index(template_data.get("status", "draft")))
+                                  index=["draft", "publish", "pending", "private"].index(template_data.get("status", "draft")), key="batch_create_post_status")
         
         # Preview generation
-        if st.button("Preview Generation"):
+        if st.button("Preview Generation", key="batch_preview_generation") :
             st.subheader("Preview of Posts to be Created")
             
             for i in range(min(3, num_posts)):
@@ -2339,7 +2340,7 @@ with tab5:
                 st.info(f"... and {num_posts - 3} more posts")
         
         # Execute bulk creation
-        if st.button("Execute Bulk Creation"):
+        if st.button("Execute Bulk Creation", key="batch_execute_bulk_creation") :
             if not wp_url:
                 st.warning("Please enter a WordPress URL")
             elif not base_title:
@@ -2412,7 +2413,7 @@ with tab5:
             st.success(f"Found {len(st.session_state.posts)} posts for potential update")
             
             # Select posts to update
-            update_option = st.radio("Select Posts to Update", ["All Fetched Posts", "Filter by Status", "Select Individually"])
+            update_option = st.radio("Select Posts to Update", ["All Fetched Posts", "Filter by Status", "Select Individually"], key="batch_update_option")
             
             selected_posts = []
             
@@ -2421,7 +2422,7 @@ with tab5:
                 st.info(f"Selected {len(selected_posts)} posts for update")
             
             elif update_option == "Filter by Status":
-                status_filter = st.selectbox("Filter by Status", ["publish", "draft", "pending", "private"])
+                status_filter = st.selectbox("Filter by Status", ["publish", "draft", "pending", "private"], key="batch_delete_filter_status")
                 selected_posts = [p for p in st.session_state.posts if p.get("status") == status_filter]
                 st.info(f"Selected {len(selected_posts)} {status_filter} posts for update")
             
@@ -2431,7 +2432,7 @@ with tab5:
                                for p in st.session_state.posts}
                 
                 selected_post_ids = st.multiselect("Select Posts to Update", 
-                                                 list(post_options.keys()))
+                                                 list(post_options.keys()), key="batch_update_selected_posts")
                 
                 # Get the selected posts
                 post_ids = [post_options[title] for title in selected_post_ids]
@@ -2443,16 +2444,16 @@ with tab5:
             st.subheader("Update Options")
             
             update_fields = st.multiselect("Select Fields to Update", 
-                                          ["Title", "Content", "Status", "ACPT Meta Fields"])
+                                          ["Title", "Content", "Status", "ACPT Meta Fields"], key="batch_update_fields")
             
             if "Title" in update_fields:
-                new_title = st.text_input("New Title (leave empty to keep original)")
+                new_title = st.text_input("New Title (leave empty to keep original)", key="batch_update_new_title")
             
             if "Content" in update_fields:
-                new_content = st.text_area("New Content (leave empty to keep original)")
+                new_content = st.text_area("New Content (leave empty to keep original)", key="batch_update_new_content")
             
             if "Status" in update_fields:
-                new_status = st.selectbox("New Status", ["publish", "draft", "pending", "private"])
+                new_status = st.selectbox("New Status", ["publish", "draft", "pending", "private"], key="batch_update_new_status")
             
             if "ACPT Meta Fields" in update_fields:
                 st.markdown("### ACPT Meta Fields to Update")
@@ -2492,7 +2493,7 @@ with tab5:
                                 })
             
             # Execute bulk update
-            if st.button("Execute Bulk Update"):
+            if st.button("Execute Bulk Update", key="batch_execute_bulk_update") :
                 if not wp_url:
                     st.warning("Please enter a WordPress URL")
                 elif not selected_posts:
@@ -2563,12 +2564,12 @@ with tab5:
             st.success(f"Found {len(st.session_state.posts)} posts for potential deletion")
             
             # Select posts to delete
-            delete_option = st.radio("Select Posts to Delete", ["Filter by Status", "Select Individually"])
+            delete_option = st.radio("Select Posts to Delete", ["Filter by Status", "Select Individually"], key="batch_delete_option")
             
             selected_posts = []
             
             if delete_option == "Filter by Status":
-                status_filter = st.selectbox("Filter by Status", ["publish", "draft", "pending", "private"])
+                status_filter = st.selectbox("Filter by Status", ["publish", "draft", "pending", "private"], key="batch_delete_filter_status")
                 selected_posts = [p for p in st.session_state.posts if p.get("status") == status_filter]
                 st.info(f"Selected {len(selected_posts)} {status_filter} posts for deletion")
             
@@ -2578,7 +2579,7 @@ with tab5:
                                for p in st.session_state.posts}
                 
                 selected_post_ids = st.multiselect("Select Posts to Delete", 
-                                                 list(post_options.keys()))
+                                                 list(post_options.keys()), key="batch_delete_selected_posts")
                 
                 # Get the selected posts
                 post_ids = [post_options[title] for title in selected_post_ids]
@@ -2588,10 +2589,10 @@ with tab5:
             
             # Confirmation
             st.warning("⚠️ Warning: This operation will permanently delete the selected posts!")
-            confirm = st.checkbox("I understand that this action cannot be undone")
+            confirm = st.checkbox("I understand that this action cannot be undone", key="batch_delete_confirm")
             
             # Execute bulk deletion
-            if st.button("Execute Bulk Deletion", disabled=not confirm):
+            if st.button("Execute Bulk Deletion", key="batch_execute_bulk_deletion", disabled=not confirm):
                 if not wp_url:
                     st.warning("Please enter a WordPress URL")
                 elif not selected_posts:
